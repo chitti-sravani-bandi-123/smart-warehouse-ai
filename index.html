@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartStock AI — Smart Warehouse</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#fff7fb;color:#2b1930}
+button,input,select{font:inherit}button{cursor:pointer;border:0}.app{display:flex;min-height:100vh}
+.sidebar{width:245px;background:#5a183f;color:#fff0f7;padding:20px 14px;position:fixed;inset:0 auto 0 0;z-index:10}
+.brand{font-size:22px;font-weight:800;padding:10px 12px 25px;color:white}.brand span{color:#ffb3d1}
+.nav{display:grid;gap:5px}.nav button{background:transparent;color:#f4d9e7;text-align:left;padding:12px;border-radius:9px;font-size:14px}.nav button:hover,.nav button.active{background:#7a2257;color:white}.nav button.active{box-shadow:inset 3px 0 #ff8fbd}
+.main{margin-left:245px;width:calc(100% - 245px);padding:24px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.top h1{margin:0;font-size:27px}.sub{color:#806b79;font-size:13px;margin-top:5px}
+.actions{display:flex;gap:10px}.btn{padding:10px 14px;border-radius:8px;background:#5a183f;color:white}.btn.teal{background:#d81b60}.btn.light{background:white;color:#241b3b;border:1px solid #efd6e2}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:white;border:1px solid #f0dce6;border-radius:14px;padding:18px;box-shadow:0 5px 18px rgba(16,24,39,.04)}.kpi-label{font-size:13px;color:#806b79}.kpi-value{font-size:28px;font-weight:800;margin:7px 0}.good{color:#15803d}.warn{color:#b45309}.bad{color:#dc2626}.blue{color:#6d28d9}
+.grid2{display:grid;grid-template-columns:1.3fr .7fr;gap:16px;margin-top:16px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}.section-title{font-weight:750;margin-bottom:14px}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{text-align:left;padding:12px 10px;border-bottom:1px solid #f3e3ea;white-space:nowrap}.table th{color:#806b79;font-size:12px;background:#fff9fc}.badge{padding:5px 8px;border-radius:999px;font-size:11px;font-weight:700;display:inline-block}.critical{background:#fee2e2;color:#b91c1c}.high{background:#fce7f3;color:#be185d}.medium{background:#fef3c7;color:#92400e}.normal{background:#ede9fe;color:#5b21b6}.pending{background:#e0e7ff;color:#5b21b6}.ready{background:#ffe4ef;color:#c2185b}
+.progress{height:7px;background:#f5e4ec;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;background:#d81b60}.decision{padding:12px;border-left:4px solid #d81b60;background:#fff0f6;border-radius:8px;margin:9px 0;font-size:13px}.decision b{display:block;margin-bottom:5px}.alert{display:flex;gap:10px;padding:12px;border-radius:9px;background:#fff7ed;margin:8px 0;font-size:13px}.alert.red{background:#fef2f2}.alert.bluea{background:#fff0f6}.toolbar{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap}.toolbar input,.toolbar select{background:white;border:1px solid #efd6e2;padding:10px;border-radius:8px;outline:none}.page{display:none}.page.active{display:block}
+.map{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.bin{padding:24px 8px;text-align:center;border-radius:10px;border:1px solid #efd6e2;background:#fffafd}.bin.goodbin{background:#ecfdf5;border-color:#c4b5fd}.bin.lowbin{background:#fff7ed;border-color:#fdba74}.bin.dangerbin{background:#fef2f2;border-color:#fca5a5}
+.bar-chart{height:210px;display:flex;align-items:end;gap:12px;padding:15px 5px}.bar{flex:1;background:#d81b60;border-radius:6px 6px 0 0;min-height:10px;position:relative}.bar span{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:#806b79}
+.ai-fab{position:fixed;right:25px;bottom:24px;width:58px;height:58px;border-radius:50%;background:#d81b60;color:white;font-size:24px;box-shadow:0 10px 30px #d81b6055;z-index:20}.ai-panel{position:fixed;right:25px;bottom:92px;width:390px;height:570px;background:white;border:1px solid #dce4ee;border-radius:16px;box-shadow:0 20px 50px #5a183f33;z-index:19;display:none;flex-direction:column;overflow:hidden}.ai-panel.open{display:flex}.ai-head{background:#5a183f;color:white;padding:16px;display:flex;justify-content:space-between}.ai-head small{color:#ffb3d1}.chat{flex:1;padding:14px;overflow:auto;background:#fffafd}.msg{max-width:88%;padding:10px 12px;border-radius:12px;margin:8px 0;font-size:13px;line-height:1.45}.bot{background:white;border:1px solid #e7e0ef}.user{background:#d81b60;color:white;margin-left:auto}.suggest{display:flex;gap:6px;overflow:auto;padding:8px}.suggest button{white-space:nowrap;background:#ffe4ef;color:#c2185b;padding:7px 9px;border-radius:15px;font-size:11px}.chat-input{display:flex;padding:10px;border-top:1px solid #e9e2f0;gap:7px}.chat-input input{flex:1;border:1px solid #efd6e2;border-radius:9px;padding:10px}.empty{text-align:center;color:#806b79;padding:35px}
+.modal{position:fixed;inset:0;background:#2b1b4b88;display:none;align-items:center;justify-content:center;z-index:30}.modal.show{display:flex}.modal-box{background:white;border-radius:14px;width:min(500px,92%);padding:22px}.modal-box input,.modal-box select{width:100%;padding:10px;margin:7px 0 12px;border:1px solid #efd6e2;border-radius:8px}.toast{position:fixed;right:20px;top:20px;background:#2b1b4b;color:white;padding:12px 16px;border-radius:9px;display:none;z-index:50}.toast.show{display:block}
+.storefront{padding:0;overflow:hidden}.store-head{padding:20px;display:flex;justify-content:space-between;gap:18px;align-items:center;background:linear-gradient(135deg,#fff0f6,#fff)}.store-title{font-size:22px;font-weight:800;color:#5a183f}.store-sub{font-size:12px;color:#806b79;margin-top:4px}.store-search{display:flex;align-items:center;gap:8px;background:white;border:1px solid #efd6e2;border-radius:8px;padding:10px 14px;width:min(430px,100%)}.store-search input{border:0;outline:0;width:100%;font-size:13px}.chips{display:flex;gap:8px;padding:12px 20px;overflow:auto;border-top:1px solid #f3e3ea;border-bottom:1px solid #f3e3ea}.chip{background:#fff;border:1px solid #efd6e2;padding:8px 13px;border-radius:20px;white-space:nowrap;color:#5a183f}.chip.active,.chip:hover{background:#d81b60;color:#fff;border-color:#d81b60}.product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px 20px}.product-card{border:1px solid #f0dce6;border-radius:10px;background:#fff;overflow:hidden;transition:.2s}.product-card:hover{transform:translateY(-3px);box-shadow:0 8px 22px #5a183f18}.product-img{height:150px;background:linear-gradient(135deg,#fff0f6,#fce8f1);display:flex;align-items:center;justify-content:center;font-size:58px}.product-info{padding:12px}.product-name{font-weight:700;font-size:14px;color:#3b2030}.product-cat{font-size:11px;color:#806b79;margin:4px 0}.product-price{font-size:18px;font-weight:800;color:#5a183f}.product-stock{font-size:11px;color:#4d7c0f;margin-top:5px}.product-stock.low{color:#c2410c}.product-actions{display:flex;gap:7px;margin-top:10px}.product-actions button{flex:1;padding:8px;border-radius:6px;background:#ffe4ef;color:#c2185b;font-size:11px}.inventory-tools{display:flex;justify-content:flex-end;gap:8px;padding:0 20px 14px}.inventory-tools select{background:white;border:1px solid #efd6e2;padding:9px;border-radius:7px}@media(max-width:1100px){.product-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1000px){.sidebar{width:72px}.brand{font-size:0}.brand:before{content:"SS";font-size:20px}.nav button{font-size:0;text-align:center}.nav button:before{content:"•";font-size:22px}.main{margin-left:72px;width:calc(100% - 72px)}.kpis{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}}
+@media(max-width:650px){.main{padding:14px}.kpis{grid-template-columns:1fr}.top{align-items:flex-start}.top h1{font-size:21px}.ai-panel{right:10px;left:10px;width:auto}.map{grid-template-columns:repeat(2,1fr)}}
+
+/* Meesho-style electronics storefront */
+.meesho-home{max-width:1280px;margin:auto}.market-header{display:flex;align-items:center;gap:22px;background:#fff;padding:12px 18px;border:1px solid #f0dbe5;border-radius:12px;position:sticky;top:10px;z-index:5;box-shadow:0 3px 14px rgba(50,20,40,.06)}.market-logo{font-size:25px;font-weight:900;color:#a21caf;white-space:nowrap}.market-logo span{color:#ec4899}.market-search{height:44px;flex:1;max-width:600px;background:#fdf2f8;border:1px solid #f3d5e4;border-radius:7px;padding:0 14px;display:flex;align-items:center;gap:8px;color:#8b5a73}.market-search input{border:0;outline:0;background:transparent;width:100%;font-size:14px}.market-links{display:flex;gap:18px;font-size:13px;color:#4b3041;white-space:nowrap}.category-strip{display:flex;gap:6px;overflow:auto;background:white;margin-top:12px;border:1px solid #f0dbe5;border-radius:10px;padding:8px}.home-cat{background:white;color:#4b3041;padding:10px 17px;border-radius:7px;white-space:nowrap}.home-cat:hover,.home-cat.active{background:#fce7f3;color:#be185d;font-weight:700}.market-banner{margin-top:14px;min-height:190px;border-radius:12px;padding:30px 38px;background:linear-gradient(100deg,#fce7f3,#f5d0fe);display:flex;align-items:center;justify-content:space-between;overflow:hidden}.market-banner small{font-weight:800;color:#be185d;letter-spacing:1px}.market-banner h2{font-size:31px;margin:7px 0}.market-banner p{margin:0 0 18px;color:#6b4860}.market-banner button{background:#be185d;color:white;border-radius:6px;padding:10px 20px;font-weight:700}.banner-icons{font-size:52px;white-space:nowrap}.market-section-head{display:flex;justify-content:space-between;align-items:center;margin:25px 0 13px}.market-section-head h2{margin:0;font-size:22px}.market-section-head p{margin:4px 0 0;color:#806b79;font-size:13px}.market-section-head>button{background:transparent;color:#be185d;font-weight:800}.home-product-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}.home-product{background:#fff;border:1px solid #eadde5;border-radius:9px;overflow:hidden;transition:.2s;box-shadow:0 2px 8px rgba(40,20,30,.04)}.home-product:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(40,20,30,.1)}.home-product-img{height:150px;background:#faf7fa;display:flex;align-items:center;justify-content:center;font-size:72px}.home-product-body{padding:12px}.home-product-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.home-product-meta{font-size:11px;color:#8b7280;margin-top:5px}.home-price{font-size:18px;font-weight:800;margin-top:8px;color:#23131e}.home-rating{font-size:11px;color:#16803c;margin-top:6px}.home-buy{width:100%;margin-top:10px;padding:9px;background:#be185d;color:white;border-radius:6px;font-weight:700}.warehouse-heading{margin-top:30px}.warehouse-heading+ .kpis{margin-bottom:16px}
+@media(max-width:1000px){.home-product-grid{grid-template-columns:repeat(3,1fr)}.market-links{display:none}.market-header{flex-wrap:wrap}.market-search{order:3;max-width:none;flex-basis:100%}}@media(max-width:650px){.home-product-grid{grid-template-columns:repeat(2,1fr)}.market-banner{padding:22px}.banner-icons{font-size:30px}.market-banner h2{font-size:24px}.market-header{position:static}.market-logo{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">SmartStock <span>AI</span></div>
+  <nav class="nav">
+    <button class="active" onclick="showPage('dashboard',this)">▦ Dashboard</button>
+    <button onclick="openAI()">✦ AI Assistant</button>
+    <button onclick="showPage('inventory',this)">▣ Inventory</button>
+    <button onclick="showPage('orders',this)">🛒 Orders</button>
+    <button onclick="showPage('allocation',this)">⇄ Allocation</button>
+    <button onclick="showPage('picking',this)">⌁ Picking</button>
+    <button onclick="showPage('packing',this)">▤ Packing</button>
+    <button onclick="showPage('qc',this)">✓ Quality Check</button>
+    <button onclick="showPage('exceptions',this)">⚠ Exceptions</button>
+    <button onclick="showPage('dispatch',this)">➜ Dispatch</button>
+    <button onclick="showPage('restock',this)">↻ Restock</button>
+    <button onclick="showPage('map',this)">⌖ Warehouse Map</button>
+    <button onclick="showPage('analytics',this)">▥ Analytics</button>
+    <button onclick="showPage('alerts',this)">🔔 Alerts</button>
+    <button onclick="showPage('settings',this)">⚙ Settings</button>
+  </nav>
+</aside>
+
+<main class="main">
+<header class="top">
+  <div><h1 id="pageTitle">Warehouse Command Center</h1><div class="sub">SmartStock AI • Decision support & fulfillment operations</div></div>
+  <div class="actions"><button class="btn light" onclick="refreshData()">↻ Refresh</button><button class="btn teal" onclick="openModal()">＋ Add Product</button></div>
+</header>
+
+<section id="dashboard" class="page active">
+<div class="meesho-home">
+  <div class="market-header">
+    <div class="market-logo">SmartStock <span>AI</span></div>
+    <div class="market-search">🔍 <input id="homeSearch" placeholder="Search for electronics, gadgets & more..." oninput="renderHomeProducts()"></div>
+    <div class="market-links"><span>👤 Profile</span><span>❤️ Wishlist</span><span>🛒 Cart</span></div>
+  </div>
+  <div class="category-strip">
+    <button class="home-cat active" onclick="homeCategory('All',this)">All</button><button class="home-cat" onclick="homeCategory('Mobile Accessories',this)">📱 Mobile</button><button class="home-cat" onclick="homeCategory('Computer Accessories',this)">💻 Computer</button><button class="home-cat" onclick="homeCategory('Audio',this)">🎧 Audio</button><button class="home-cat" onclick="homeCategory('Wearables',this)">⌚ Smart Watches</button><button class="home-cat" onclick="homeCategory('Gaming',this)">🎮 Gaming</button><button class="home-cat" onclick="homeCategory('Electronics',this)">⚡ Electronics</button>
+  </div>
+  <div class="market-banner"><div><small>SMART DEALS ON ELECTRONICS</small><h2>Upgrade Your Gadgets ✨</h2><p>Best prices • Fresh stock • Smart warehouse fulfillment</p><button onclick="homeCategory('All',document.querySelector('.home-cat'))">Shop Now →</button></div><div class="banner-icons">🎧 &nbsp; ⌚ &nbsp; 🔊 &nbsp; 🔋 &nbsp; 📱</div></div>
+  <div class="market-section-head"><div><h2>Electronics For You</h2><p>Trending products at great prices</p></div><button onclick="showPage('inventory',document.querySelectorAll('.nav button')[2])">View All →</button></div>
+  <div id="homeProductGrid" class="home-product-grid"></div>
+  <div class="market-section-head warehouse-heading"><div><h2>Smart Warehouse Overview</h2><p>Live inventory and fulfillment intelligence</p></div></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid2"><div class="card"><div class="section-title">🤖 Smart Decisions</div><div id="decisions"></div></div><div class="card"><div class="section-title">🚨 Critical Alerts</div><div id="dashAlerts"></div></div></div>
+</div>
+</section>
+
+<section id="inventory" class="page"><div class="card storefront"><div class="store-head"><div><div class="store-title">SmartStock Electronics</div><div class="store-sub">Shop-style product view • Warehouse inventory</div></div><div class="store-search"><span>🔍</span><input id="invSearch" placeholder="Search electronics, accessories..." oninput="renderInventory()"></div></div><div class="chips"><button class="chip active" onclick="filterCategory('All',this)">All</button><button class="chip" onclick="filterCategory('Mobile Accessories',this)">📱 Mobile</button><button class="chip" onclick="filterCategory('Computer Accessories',this)">💻 Computer</button><button class="chip" onclick="filterCategory('Audio',this)">🎧 Audio</button><button class="chip" onclick="filterCategory('Wearables',this)">⌚ Wearables</button><button class="chip" onclick="filterCategory('Gaming',this)">🎮 Gaming</button></div><div id="productGrid" class="product-grid"></div><div class="inventory-tools"><select id="invFilter" onchange="renderInventory()"><option>All</option><option>Healthy</option><option>Low Stock</option><option>Out of Stock</option><option>Damaged</option></select><button class="btn teal" onclick="openModal()">＋ Add Product</button></div><div class="table-wrap"><table class="table" id="invTable"></table></div></div></section>
+
+<section id="orders" class="page"><div class="card"><div class="section-title">Order Management</div><div class="toolbar"><input id="orderSearch" placeholder="Search order/customer..." oninput="renderOrders()"><select id="orderFilter" onchange="renderOrders()"><option>All</option><option>Critical</option><option>High</option><option>Medium</option><option>Normal</option></select></div><div class="table-wrap"><table class="table" id="orderTable"></table></div></div></section>
+
+<section id="allocation" class="page"><div class="card"><div class="section-title">🧠 Smart Inventory Allocation</div><p class="sub">Priority-first allocation automatically detects stock conflicts and partial fulfillment.</p><div id="allocationBox"></div></div></section>
+
+<section id="picking" class="page"><div class="card"><div class="section-title">Picking Management</div><div class="table-wrap"><table class="table" id="pickingTable"></table></div></div></section>
+<section id="packing" class="page"><div class="card"><div class="section-title">Packing Management</div><div class="table-wrap"><table class="table" id="packingTable"></table></div></div></section>
+<section id="qc" class="page"><div class="card"><div class="section-title">Quality Check</div><div class="table-wrap"><table class="table" id="qcTable"></table></div></div></section>
+<section id="exceptions" class="page"><div class="card"><div class="section-title">Exception Management</div><div id="exceptionList"></div></div></section>
+<section id="dispatch" class="page"><div class="card"><div class="section-title">Dispatch Tracking</div><div class="table-wrap"><table class="table" id="dispatchTable"></table></div></div></section>
+<section id="restock" class="page"><div class="card"><div class="section-title">Restock Recommendations</div><div id="restockList"></div></div></section>
+<section id="map" class="page"><div class="card"><div class="section-title">📍 Interactive Warehouse Map</div><div class="map" id="warehouseMap"></div></div></section>
+<section id="analytics" class="page"><div class="grid3"><div class="card"><div class="kpi-label">Average Fulfillment</div><div class="kpi-value">3.8h</div></div><div class="card"><div class="kpi-label">Picking Efficiency</div><div class="kpi-value good">92%</div></div><div class="card"><div class="kpi-label">Delayed Orders</div><div class="kpi-value bad">4</div></div></div><div class="grid2"><div class="card"><div class="section-title">Daily Orders</div><div class="bar-chart" id="dailyChart"></div></div><div class="card"><div class="section-title">Exception Analytics</div><div id="exceptionAnalytics"></div></div></div></section>
+<section id="alerts" class="page"><div class="card"><div class="section-title">🔔 Smart Alert Center</div><div id="alertPage"></div></div></section>
+<section id="settings" class="page"><div class="card"><div class="section-title">Settings & Demo Role</div><p class="sub">Current role</p><select id="role" onchange="toast('Role changed to '+this.value)"><option>Admin</option><option>Warehouse Manager</option><option>Warehouse Staff</option></select><p class="sub">Demo mode uses local mock data. The AI Assistant works without an external API using the built-in decision engine.</p></div></section>
+</main>
+</div>
+
+<button class="ai-fab" onclick="toggleAI()">✦</button>
+<div class="ai-panel" id="aiPanel">
+ <div class="ai-head"><div><b>SmartStock AI</b><br><small>Decision Assistant • Online</small></div><div><button style="background:transparent;color:white" onclick="clearChat()">Clear</button> <button style="background:transparent;color:white" onclick="toggleAI()">✕</button></div></div>
+ <div class="chat" id="chat"></div>
+ <div class="suggest">
+  <button onclick="ask('Which orders should be processed first?')">Analyze Orders</button>
+  <button onclick="ask('Which products are low in stock?')">Check Stock</button>
+  <button onclick="ask('Where is the current warehouse bottleneck?')">Find Bottlenecks</button>
+  <button onclick="ask('Show me today’s critical issues.')">Critical Issues</button>
+  <button onclick="ask('Which products should be reordered?')">Restock</button>
+ </div>
+ <div class="chat-input"><input id="aiInput" placeholder="Ask the warehouse AI..." onkeydown="if(event.key==='Enter')sendAI()"><button class="btn teal" onclick="sendAI()">Send</button></div>
+</div>
+
+<div class="modal" id="modal"><div class="modal-box"><h2>Add Product</h2><label>Product Name</label><input id="newName" placeholder="e.g. Barcode Scanner"><label>Category</label><input id="newCat" placeholder="Electronics"><label>Available Quantity</label><input id="newQty" type="number" value="20"><label>Minimum Stock</label><input id="newMin" type="number" value="10"><label>Maximum Stock</label><input id="newMax" type="number" value="50"><button class="btn teal" onclick="addProduct()">Save Product</button> <button class="btn light" onclick="closeModal()">Cancel</button></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const products=[
+{id:'P-101',name:'Wireless Mouse',cat:'Computer Accessories',sku:'WM-1001',qty:48,res:12,dam:0,min:20,max:80,bin:'B-02',price:499,icon:'🖱️'},
+{id:'P-102',name:'Bluetooth Keyboard',cat:'Computer Accessories',sku:'KB-2001',qty:42,res:15,dam:1,min:15,max:60,bin:'A-03',price:899,icon:'⌨️'},
+{id:'P-103',name:'USB-C Fast Charger 33W',cat:'Mobile Accessories',sku:'CH-3010',qty:65,res:8,dam:0,min:20,max:100,bin:'C-01',price:699,icon:'🔌'},
+{id:'P-104',name:'Wireless Earbuds',cat:'Audio',sku:'EB-4400',qty:38,res:6,dam:0,min:15,max:70,bin:'A-01',price:1199,icon:'🎧'},
+{id:'P-105',name:'HD Webcam 1080p',cat:'Computer Accessories',sku:'WC-5500',qty:14,res:3,dam:0,min:10,max:30,bin:'B-04',price:1499,icon:'📷'},
+{id:'P-106',name:'Smart Watch',cat:'Wearables',sku:'SW-6100',qty:31,res:8,dam:1,min:12,max:45,bin:'C-03',price:1799,icon:'⌚'},
+{id:'P-107',name:'Bluetooth Speaker',cat:'Audio',sku:'BS-7100',qty:26,res:5,dam:0,min:12,max:50,bin:'C-04',price:999,icon:'🔊'},
+{id:'P-108',name:'Power Bank 10000mAh',cat:'Mobile Accessories',sku:'PB-8200',qty:55,res:5,dam:0,min:20,max:100,bin:'B-01',price:849,icon:'🔋'},
+{id:'P-109',name:'Gaming Headphones',cat:'Gaming',sku:'GH-9100',qty:22,res:4,dam:0,min:10,max:40,bin:'D-01',price:1599,icon:'🎮'},
+{id:'P-110',name:'Mini LED Projector',cat:'Electronics',sku:'PJ-1002',qty:18,res:2,dam:0,min:8,max:30,bin:'D-02',price:3299,icon:'📽️'},
+{id:'P-111',name:'USB Hub 4-Port',cat:'Computer Accessories',sku:'UH-1103',qty:12,res:3,dam:1,min:15,max:45,bin:'D-03',price:749,icon:'🔗'},
+{id:'P-112',name:'Ring Light with Tripod',cat:'Electronics',sku:'RL-1204',qty:29,res:4,dam:0,min:10,max:50,bin:'D-04',price:1099,icon:'💡'}
+];
+const orders=[
+{id:'1045',customer:'Acme Retail',items:'Wireless Mouse',qty:10,priority:'Critical',deadline:'Today 14:00',status:'Pending',fulfill:70,age:5},
+{id:'1048',customer:'Nova Stores',items:'Wireless Mouse',qty:5,priority:'Normal',deadline:'Tomorrow',status:'Pending',fulfill:0,age:2},
+{id:'1051',customer:'TechWorld',items:'Keyboard + Webcam',qty:8,priority:'High',deadline:'Today 18:00',status:'Allocated',fulfill:100,age:4},
+{id:'1055',customer:'OfficePro',items:'Laptop Stand',qty:6,priority:'Medium',deadline:'Aug 19',status:'Picking',fulfill:60,age:3},
+{id:'1062',customer:'QuickMart',items:'USB-C Hub',qty:4,priority:'High',deadline:'Today 16:00',status:'Pending',fulfill:0,age:6},
+{id:'1067',customer:'Retail Hub',items:'Barcode Scanner',qty:3,priority:'Normal',deadline:'Aug 20',status:'Packed',fulfill:100,age:1},
+{id:'1071',customer:'Global Shop',items:'Packing Tape',qty:12,priority:'High',deadline:'Today 17:00',status:'QC',fulfill:90,age:4},
+{id:'1075',customer:'MegaMart',items:'Thermal Labels',qty:20,priority:'Normal',deadline:'Aug 21',status:'Ready',fulfill:100,age:2}
+];
+const picking=[
+['1045','Ravi','Wireless Mouse',7,'B-02','Picking'],['1055','Anu','Laptop Stand',6,'A-01','Picking'],['1067','Kiran','Barcode Scanner',3,'C-03','Completed'],['1071','Sita','Packing Tape',12,'C-04','Waiting'],['1051','Mohan','Keyboard',8,'A-03','Completed']
+];
+const packing=[['1051','Station 02','Keyboard + Webcam','Completed','2.4 kg','Mohan'],['1067','Station 01','Barcode Scanner','Completed','1.1 kg','Kiran'],['1071','Station 03','Packing Tape','Packing','1.8 kg','Sita']];
+const qcs=[['1051','Good','8 / 8','Verified','Passed','Mohan'],['1067','Good','3 / 3','Verified','Passed','Kiran'],['1071','Good','11 / 12','Verified','Failed','Sita'],['1045','Pending','7 / 10','Pending','Pending','-']];
+const dispatches=[['1075','MegaMart','Box #1075','Dispatched','Delhivery','10:20','Tomorrow','On time'],['1067','Retail Hub','Box #1067','In Transit','BlueDart','09:40','Today 17:00','On time'],['1051','TechWorld','Box #1051','Ready','DTDC','-','Today 18:00','Waiting']];
+
+function statusProduct(p){if(p.dam>0&&p.qty<=p.min)return 'Damaged';if(p.qty===0)return 'Out of Stock';if(p.qty<=p.min)return 'Low Stock';return 'Healthy'}
+function priorityScore(o){return ({Critical:100,High:75,Medium:50,Normal:25}[o.priority]||0)+(o.age*3)+(o.deadline.includes('Today')?20:0)+(o.fulfill<50?10:0)}
+function badge(x){let c=x.toLowerCase().replaceAll(' ','-');return `<span class="badge ${c}">${x}</span>`}
+function showPage(id,btn){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');
+ const titles={dashboard:'Warehouse Command Center',inventory:'Inventory Management',orders:'Order Management',allocation:'Smart Inventory Allocation',picking:'Picking Management',packing:'Packing Management',qc:'Quality Check',exceptions:'Exception Management',dispatch:'Dispatch Tracking',restock:'Restock Recommendations',map:'Warehouse Map',analytics:'Warehouse Analytics',alerts:'Smart Alert Center',settings:'Settings'};
+ document.getElementById('pageTitle').textContent=titles[id]||id;
+ renderAll();
+}
+let homeSelectedCategory='All';
+function homeCategory(cat,btn){homeSelectedCategory=cat;document.querySelectorAll('.home-cat').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');renderHomeProducts()}
+function renderHomeProducts(){const q=(document.getElementById('homeSearch')?.value||'').toLowerCase();let a=products.filter(p=>(p.name+p.cat).toLowerCase().includes(q)).filter(p=>homeSelectedCategory==='All'||p.cat===homeSelectedCategory);document.getElementById('homeProductGrid').innerHTML=a.slice(0,10).map(p=>`<div class="home-product"><div class="home-product-img">${p.icon}</div><div class="home-product-body"><div class="home-product-name">${p.name}</div><div class="home-product-meta">${p.cat}</div><div class="home-price">₹${p.price.toLocaleString('en-IN')}</div><div class="home-rating">★ 4.3 &nbsp; • &nbsp; ${p.qty} in stock</div><button class="home-buy" onclick="toast('${p.name} added to cart')">Add to Cart</button></div></div>`).join('')||'<div class="empty">No electronics found.</div>'}
+function renderAll(){renderHomeProducts();renderKPIs();renderDecisions();renderAlerts();renderPriority();renderInventory();renderOrders();renderAllocation();renderPicking();renderPacking();renderQC();renderExceptions();renderDispatch();renderRestock();renderMap();renderCharts();renderExceptionAnalytics()}
+function renderKPIs(){
+ const low=products.filter(p=>p.qty<=p.min).length, critical=orders.filter(o=>o.priority==='Critical').length;
+ const k=[['Total Products',products.length,'blue'],['Available Stock',products.reduce((a,p)=>a+p.qty,0),'good'],['Pending Orders',orders.filter(o=>o.status==='Pending').length,'warn'],['Critical Orders',critical,'bad'],['Orders Picking',orders.filter(o=>o.status==='Picking').length,'blue'],['Ready to Dispatch',orders.filter(o=>o.status==='Ready').length,'good'],['Low Stock Products',low,'warn'],['Active Exceptions',4,'bad']];
+ document.getElementById('kpis').innerHTML=k.map(x=>`<div class="card"><div class="kpi-label">${x[0]}</div><div class="kpi-value ${x[2]}">${x[1]}</div><div class="sub">Updated just now</div></div>`).join('');
+}
+function renderDecisions(){
+ const top=[...orders].sort((a,b)=>priorityScore(b)-priorityScore(a))[0];
+ document.getElementById('decisions').innerHTML=`<div class="decision"><b>1. ${top.id} should be processed first.</b>Reason: ${top.priority} priority + deadline ${top.deadline}.<br><b>Action:</b> Start allocation/picking immediately.</div>
+ <div class="decision"><b>2. Wireless Mouse should be reordered.</b>Current stock: 8 • Minimum: 20 • Recommended: 42 units.<br><b>Action:</b> Create replenishment request.</div>
+ <div class="decision"><b>3. Picking Station 03 is a bottleneck.</b>18 pending tasks and highest average processing time.<br><b>Action:</b> Assign another picker.</div>
+ <div class="decision"><b>4. Order 1062 has a stock conflict.</b>USB-C Hub has 0 available units.<br><b>Action:</b> Hold order and restock.</div>`;
+}
+function renderAlerts(){
+ const a=[['🔴','Critical order cannot be fulfilled','Order #1062 needs USB-C Hub but available stock is 0.','red'],['🟠','Product below minimum stock','Wireless Mouse: 8 available vs 20 minimum.',''],['🟡','Order approaching deadline','Order #1045 deadline is today at 14:00.','bluea'],['⚠️','QC failure','Order #1071 has a quantity mismatch.','red']];
+ document.getElementById('dashAlerts').innerHTML=a.slice(0,3).map(x=>`<div class="alert ${x[3]}"><b>${x[0]}</b><div><b>${x[1]}</b><br>${x[2]}</div></div>`).join('');
+ document.getElementById('alertPage').innerHTML=a.map(x=>`<div class="alert ${x[3]}"><b>${x[0]}</b><div><b>${x[1]}</b><br>${x[2]}<br><button class="btn light" style="margin-top:7px" onclick="toast('Issue opened for investigation')">Investigate</button></div></div>`).join('');
+}
+function renderPriority(){
+ const s=[...orders].sort((a,b)=>priorityScore(b)-priorityScore(a)).slice(0,6);
+ document.getElementById('priorityTable').innerHTML='<tr><th>Order</th><th>Customer</th><th>Priority</th><th>Deadline</th><th>Status</th><th>Fulfillment</th></tr>'+s.map(o=>`<tr><td>#${o.id}</td><td>${o.customer}</td><td>${badge(o.priority)}</td><td>${o.deadline}</td><td>${badge(o.status)}</td><td><div style="width:110px">${o.fulfill}%<div class="progress"><i style="width:${o.fulfill}%"></i></div></div></td></tr>`).join('');
+}
+let selectedCategory='All';
+function filterCategory(cat,btn){selectedCategory=cat;document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));btn.classList.add('active');renderInventory()}
+function renderInventory(){
+ const q=(document.getElementById('invSearch')?.value||'').toLowerCase(), f=document.getElementById('invFilter')?.value||'All';
+ let a=products.filter(p=>(p.name+p.sku+p.bin+p.cat).toLowerCase().includes(q)).filter(p=>selectedCategory==='All'||p.cat===selectedCategory).filter(p=>f==='All'||statusProduct(p)===f);
+ document.getElementById('productGrid').innerHTML=a.map(p=>{let st=statusProduct(p);return `<div class="product-card"><div class="product-img">${p.icon}</div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-cat">${p.cat}</div><div class="product-price">₹${p.price.toLocaleString('en-IN')}</div><div class="product-stock ${st!=='Healthy'?'low':''}">${st} • ${p.qty} units available</div><div class="product-actions"><button onclick="toast('${p.name} — SKU ${p.sku}')">View</button><button onclick="toast('Restock request created for ${p.name}')">Restock</button></div></div></div>`}).join('');
+ document.getElementById('invTable').innerHTML='<tr><th>ID</th><th>Product</th><th>Category</th><th>SKU</th><th>Available</th><th>Reserved</th><th>Damaged</th><th>Min/Max</th><th>Bin</th><th>Status</th></tr>'+a.map(p=>`<tr><td>${p.id}</td><td><b>${p.name}</b></td><td>${p.cat}</td><td>${p.sku}</td><td>${p.qty}</td><td>${p.res}</td><td>${p.dam}</td><td>${p.min}/${p.max}</td><td>${p.bin}</td><td>${badge(statusProduct(p))}</td></tr>`).join('');
+}
+function renderOrders(){
+ const q=(document.getElementById('orderSearch')?.value||'').toLowerCase(),f=document.getElementById('orderFilter')?.value||'All';
+ let a=orders.filter(o=>(o.id+o.customer+o.items).toLowerCase().includes(q)).filter(o=>f==='All'||o.priority===f);
+ document.getElementById('orderTable').innerHTML='<tr><th>Order</th><th>Customer</th><th>Items</th><th>Qty</th><th>Priority</th><th>Deadline</th><th>Status</th><th>Fulfillment</th></tr>'+a.map(o=>`<tr><td>#${o.id}</td><td>${o.customer}</td><td>${o.items}</td><td>${o.qty}</td><td>${badge(o.priority)}</td><td>${o.deadline}</td><td>${badge(o.status)}</td><td>${o.fulfill}%</td></tr>`).join('');
+}
+function renderAllocation(){
+ document.getElementById('allocationBox').innerHTML=`<div class="decision"><b>Stock Conflict Detected — Wireless Mouse</b>Available Stock: <b>7 usable units</b> after operational reservation.<br><br><b>Order #1045</b> — Critical — Required 10 — <b>Allocated 7</b> — Remaining 3<br><b>Order #1048</b> — Normal — Required 5 — <b>Allocated 0</b> — Remaining 5<br><br><b>Decision:</b> Allocate all 7 units to #1045 and hold #1048.<br><b>Next Action:</b> Restock 3+5 units.</div>`;
+}
+function renderPicking(){document.getElementById('pickingTable').innerHTML='<tr><th>Order</th><th>Picker</th><th>Product</th><th>Qty</th><th>Location</th><th>Status</th></tr>'+picking.map(x=>`<tr>${x.map((v,i)=>`<td>${i===5?badge(v):v}</td>`).join('')}</tr>`).join('')}
+function renderPacking(){document.getElementById('packingTable').innerHTML='<tr><th>Order</th><th>Station</th><th>Items</th><th>Status</th><th>Weight</th><th>Employee</th></tr>'+packing.map(x=>`<tr>${x.map((v,i)=>`<td>${i===3?badge(v):v}</td>`).join('')}</tr>`).join('')}
+function renderQC(){document.getElementById('qcTable').innerHTML='<tr><th>Order</th><th>Condition</th><th>Quantity</th><th>Packaging</th><th>QC Status</th><th>Employee</th></tr>'+qcs.map(x=>`<tr>${x.map((v,i)=>`<td>${i===4?badge(v):v}</td>`).join('')}</tr>`).join('')}
+function renderExceptions(){document.getElementById('exceptionList').innerHTML=[['Damaged Product','Order #1045 may be delayed.','Find replacement stock from Bin B-12.','Replacement allocated.','Resolved'],['Stock Shortage','Order #1062 cannot be fulfilled.','Hold order and replenish USB-C Hub.','Waiting for restock.','Open'],['Quantity Mismatch','Order #1071 has 11 of 12 units.','Return to picking and verify inventory.','Recount required.','Open'],['Delayed Order','Order #1045 is nearing deadline.','Prioritize picking immediately.','Escalated to manager.','In Progress']].map(x=>`<div class="decision"><b>⚠️ ${x[0]} — ${x[4]}</b><b>Impact:</b> ${x[1]}<br><b>Recommended Action:</b> ${x[2]}<br><b>Resolution:</b> ${x[3]}</div>`).join('')}
+function renderDispatch(){document.getElementById('dispatchTable').innerHTML='<tr><th>Order</th><th>Customer</th><th>Package</th><th>Status</th><th>Carrier</th><th>Dispatch</th><th>Expected</th><th>Delay</th></tr>'+dispatches.map(x=>`<tr>${x.map((v,i)=>`<td>${i===3||i===7?badge(v):v}</td>`).join('')}</tr>`).join('')}
+function renderRestock(){document.getElementById('restockList').innerHTML=products.filter(p=>p.qty<=p.min).map(p=>{let r=p.max-p.qty;return `<div class="decision"><b>🚨 ${p.name}</b><br>Current Stock: ${p.qty} • Minimum: ${p.min}<br><b>Recommended Reorder: ${r}</b> units<br><button class="btn teal" style="margin-top:8px" onclick="toast('Restock request created for ${p.name}')">Create Restock Request</button></div>`}).join('')}
+function renderMap(){document.getElementById('warehouseMap').innerHTML=products.map(p=>`<div class="bin ${p.qty===0?'dangerbin':p.qty<=p.min?'lowbin':'goodbin'}" onclick="toast('${p.bin}: ${p.name} — ${p.qty} units')"><b>${p.bin}</b><br><small>${p.name}</small><br><strong>${p.qty} units</strong><br><small>${statusProduct(p)}</small></div>`).join('')}
+function renderCharts(){
+ const statuses=['Pending','Allocated','Picking','Packed','QC','Ready','Dispatched'];const vals=statuses.map(s=>orders.filter(o=>o.status===s).length);
+ document.getElementById('statusChart').innerHTML=vals.map((v,i)=>`<div class="bar" style="height:${Math.max(18,v*38)}px" title="${statuses[i]}: ${v}"><span>${statuses[i]}</span></div>`).join('');
+ document.getElementById('dailyChart').innerHTML=[12,18,14,23,19,27,31].map((v,i)=>`<div class="bar" style="height:${v*5}px"><span>${['Mon','Tue','Wed','Thu','Fri','Sat','Today'][i]}</span></div>`).join('');
+ document.getElementById('health').innerHTML=`<p>Fulfillment completion</p><div class="progress"><i style="width:78%"></i></div><p class="sub">78% of active orders are on track.</p><p>Inventory health</p><div class="progress"><i style="width:84%"></i></div><p class="sub">84% of SKUs are above minimum stock.</p>`;
+}
+function renderExceptionAnalytics(){document.getElementById('exceptionAnalytics').innerHTML=['Damaged items — 3','Missing items — 2','QC failures — 1','Stock conflicts — 2'].map(x=>`<div class="alert">${x}</div>`).join('')}
+function toggleAI(){document.getElementById('aiPanel').classList.toggle('open');if(!document.getElementById('chat').children.length)bot('Hello! I’m SmartStock AI. I analyze your warehouse data and recommend the next best action. Try “Which orders should be processed first?”');}
+function openAI(){document.getElementById('aiPanel').classList.add('open');toggleAI()}
+function bot(t){document.getElementById('chat').insertAdjacentHTML('beforeend',`<div class="msg bot">${t}</div>`);let c=document.getElementById('chat');c.scrollTop=c.scrollHeight}
+function user(t){document.getElementById('chat').insertAdjacentHTML('beforeend',`<div class="msg user">${t}</div>`)}
+function clearChat(){document.getElementById('chat').innerHTML='';bot('Conversation cleared. Ask me about orders, stock, allocation, bottlenecks, exceptions or restocking.')}
+function sendAI(){let i=document.getElementById('aiInput'),t=i.value.trim();if(!t)return;ask(t);i.value=''}
+function ask(t){document.getElementById('aiPanel').classList.add('open');user(t);setTimeout(()=>bot(aiAnswer(t)),350)}
+function aiAnswer(q){
+ const x=q.toLowerCase();
+ if(x.includes('first')||x.includes('priority')||x.includes('orders')){let s=[...orders].sort((a,b)=>priorityScore(b)-priorityScore(a)).slice(0,3);return `<b>Situation:</b> ${s.length} orders need prioritization.<br><br><b>Analysis:</b> I scored priority, deadline, order age and fulfillment.<br><br><b>Recommended Action:</b> Process <b>#${s[0].id}</b> first (${s[0].priority}, deadline ${s[0].deadline}), followed by #${s[1].id} and #${s[2].id}.`;}
+ if(x.includes('low')||x.includes('stock')){let a=products.filter(p=>p.qty<=p.min);return `<b>Situation:</b> ${a.length} products are at or below minimum stock.<br><br><b>Analysis:</b> ${a.map(p=>p.name+': '+p.qty+'/'+p.min).join(' • ')}.<br><br><b>Recommended Action:</b> Reorder ${a.map(p=>p.name+' ('+(p.max-p.qty)+')').join(', ')}.`;}
+ if(x.includes('reorder')||x.includes('restock')){return `<b>Situation:</b> Replenishment is required for low-stock SKUs.<br><br><b>Analysis:</b> Wireless Mouse is at 8 vs minimum 20; USB-C Hub is out of stock; Packing Tape is at 9 vs minimum 15.<br><br><b>Recommended Action:</b> Reorder 42 Wireless Mouse, 40 USB-C Hub and 61 Packing Tape.`;}
+ if(x.includes('bottleneck'))return `<b>Situation:</b> Picking is the current operational bottleneck.<br><br><b>Analysis:</b> Station 03 has 18 pending tasks and the highest processing time.<br><br><b>Recommended Action:</b> Assign another picker to Station 03 and prioritize orders approaching their deadlines.`;
+ if(x.includes('critical')||x.includes('issue'))return `<b>Situation:</b> There are critical fulfillment risks.<br><br><b>Analysis:</b> #1045 has a critical deadline and a stock conflict; #1062 has zero available USB-C Hub stock; #1071 has a QC quantity mismatch.<br><br><b>Recommended Action:</b> Allocate available Mouse stock to #1045, hold #1062 for replenishment, and return #1071 to picking for recount.`;
+ if(x.includes('allocate'))return `<b>Situation:</b> Wireless Mouse stock is insufficient for two orders.<br><br><b>Analysis:</b> 7 usable units are available. #1045 is Critical and requires 10; #1048 is Normal and requires 5.<br><br><b>Recommended Action:</b> Allocate all 7 to #1045, hold #1048, and generate a restock recommendation.`;
+ if(x.includes('delay')||x.includes('1045'))return `<b>Situation:</b> Order #1045 is at risk of delay.<br><br><b>Analysis:</b> It is Critical, requires 10 Wireless Mouse units, but only 7 usable units can be allocated.<br><br><b>Recommended Action:</b> Partially allocate 7 now, prioritize picking, and replenish the missing 3 units.`;
+ return `<b>Situation:</b> I checked the current mock warehouse data.<br><br><b>Analysis:</b> The main risks are stock shortages, the picking bottleneck and one QC mismatch.<br><br><b>Recommended Action:</b> Ask me about <b>orders, stock, allocation, bottlenecks, critical issues, or restock</b> for a specific decision.`;
+}
+function openModal(){document.getElementById('modal').classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function addProduct(){let n=document.getElementById('newName').value.trim();if(!n)return toast('Enter a product name');let id='P-'+(109+products.length),q=+document.getElementById('newQty').value,min=+document.getElementById('newMin').value,max=+document.getElementById('newMax').value;products.push({id,name:n,cat:document.getElementById('newCat').value||'General',sku:'NEW-'+Date.now().toString().slice(-4),qty:q,res:0,dam:0,min,max,bin:'A-04'});closeModal();renderAll();toast('Product added successfully')}
+function refreshData(){renderAll();toast('Warehouse data refreshed')}
+function toast(t){let e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+renderAll();
+</script>
+</body>
+</html>
